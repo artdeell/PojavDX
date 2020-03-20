@@ -238,6 +238,7 @@ public class Main {
         DxContext context = new DxContext();
         Arguments arguments = new Arguments(context);
         arguments.parse(argArray);
+	    /* Listener created for debugging. Now unused.
         ObserverStatus.setListener(new ObserverStatus.ProcessListener() {
             @Override
             public void onProcess(String var1, int var2, int var3) {
@@ -245,6 +246,7 @@ public class Main {
                 System.out.println(var1 + ": "+var2+"/"+var3);
             }
         }) ;
+	*/
         int result = new Main(context).runDx(arguments);
 
         if (result != 0) {
