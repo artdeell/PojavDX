@@ -17,6 +17,8 @@
 package com.android.dx.cf.direct;
 
 import com.android.dex.util.FileUtils;
+import com.android.dx.command.dexer.Main;
+import com.android.dx.observer.ObserverStatus;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -260,7 +262,8 @@ public class ClassPathOpener {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(40000);
         byte[] buf = new byte[20000];
         boolean any = false;
-
+        ObserverStatus.maxProgress = entriesList.size();
+        ObserverStatus.currentProgress = 0;
         for (ZipEntry one : entriesList) {
             final boolean isDirectory = one.isDirectory();
 
