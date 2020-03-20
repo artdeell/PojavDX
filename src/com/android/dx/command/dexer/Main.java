@@ -37,6 +37,7 @@ import com.android.dx.dex.file.DexFile;
 import com.android.dx.dex.file.EncodedMethod;
 import com.android.dx.merge.CollisionPolicy;
 import com.android.dx.merge.DexMerger;
+import com.android.dx.observer.ObserverStatus;
 import com.android.dx.rop.annotation.Annotation;
 import com.android.dx.rop.annotation.Annotations;
 import com.android.dx.rop.annotation.AnnotationsList;
@@ -89,7 +90,8 @@ public class Main {
      * File extension of a {@code .dex} file.
      */
     private static final String DEX_EXTENSION = ".dex";
-
+    //public static int max = 0;
+    //public static int progress = 0;
     /**
      * File name prefix of a {@code .dex} file automatically loaded in an
      * archive.
@@ -236,7 +238,13 @@ public class Main {
         DxContext context = new DxContext();
         Arguments arguments = new Arguments(context);
         arguments.parse(argArray);
-
+        ObserverStatus.setListener(new ObserverStatus.ProcessListener() {
+            @Override
+            public void onProcess(String var1, int var2, int var3) {
+                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                System.out.println(var1 + ": "+var2+"/"+var3);
+            }
+        }) ;
         int result = new Main(context).runDx(arguments);
 
         if (result != 0) {
@@ -697,7 +705,7 @@ public class Main {
      * @return whether processing was successful
      */
     private boolean processFileBytes(String name, long lastModified, byte[] bytes) {
-
+        //System.out.println("progress: " + ObserverStatus.currentProgress +"/"+ObserverStatus.maxProgress+ ": " + name);
         boolean isClass = name.endsWith(".class");
         boolean isClassesDex = name.equals(DexFormat.DEX_IN_JAR_NAME);
         boolean keepResources = (outputResources != null);
@@ -706,6 +714,8 @@ public class Main {
             if (args.verbose) {
                 context.out.println("ignored resource " + name);
             }
+            ObserverStatus.currentProgress++;
+            ObserverStatus.change(name);
             return false;
         }
 
@@ -723,21 +733,29 @@ public class Main {
                 }
             }
             if (lastModified < minimumFileAge) {
+                ObserverStatus.currentProgress++;
+                ObserverStatus.change(name);
                 return true;
             }
             processClass(fixedName, bytes);
             // Assume that an exception may occur. Status will be updated
             // asynchronously, if the class compiles without error.
+           ObserverStatus.currentProgress++;
+           ObserverStatus.change(name);
             return false;
         } else if (isClassesDex) {
             synchronized (libraryDexBuffers) {
                 libraryDexBuffers.add(bytes);
             }
+            ObserverStatus.currentProgress++;
+            ObserverStatus.change(name);
             return true;
         } else {
             synchronized (outputResources) {
                 outputResources.put(fixedName, bytes);
             }
+            ObserverStatus.currentProgress++;
+            ObserverStatus.change(name);
             return true;
         }
     }
