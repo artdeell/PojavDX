@@ -1,0 +1,49 @@
+package com.android.dx.observer;
+
+import com.android.dx.mod.MethodData;
+import java.lang.reflect.Method;
+
+public class ObserverStatus {
+
+   public static int currentProgress = 0;
+   private static MethodData data;
+   private static ObserverStatus.ProcessListener listener;
+   public static Method m;
+   public static int maxProgress = 0;
+
+
+   public static void change(String var0) {
+      if(listener != null) {
+         listener.onProcess(var0, maxProgress, currentProgress);
+      }
+
+      if(data != null) {
+         try {
+            makeClass();
+            m.invoke((Object)null, new Object[]{var0, new Integer(maxProgress), new Integer(currentProgress)});
+         } catch (Exception var1) {
+            throw new RuntimeException(var1);
+         }
+      }
+
+   }
+
+   public static void makeClass() throws Exception {
+      if(m == null) {
+         m = Class.forName(data.classCall).getMethod(data.methodName, data.fieldKeys);
+      }
+   }
+
+   public static void setListener(ObserverStatus.ProcessListener var0) {
+      listener = var0;
+   }
+
+   public static void setReceiver(String var0) {
+      data = new MethodData(var0);
+   }
+
+   public interface ProcessListener {
+
+      void onProcess(String var1, int var2, int var3);
+   }
+}
